@@ -7,6 +7,7 @@ use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\AffiliateController;
 use App\Http\Controllers\API\DigitalWardrobeController;
 use App\Http\Controllers\API\OutfitController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,12 +20,19 @@ use App\Http\Controllers\API\OutfitController;
 |
 */
 
+// Authentication routes
+Route::post('/login', [AuthController::class, 'apiLogin']);
+Route::post('/register', [AuthController::class, 'apiRegister']);
+
 // Public routes
 Route::get('/affiliate/program-info', [AffiliateController::class, 'getProgramInfo']);
 Route::get('/affiliate/leaderboard', [AffiliateController::class, 'getLeaderboard']);
 
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
+    
+    // Authentication
+    Route::post('/logout', [AuthController::class, 'apiLogout']);
     
     // User info
     Route::get('/user', function (Request $request) {
