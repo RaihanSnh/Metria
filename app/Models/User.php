@@ -81,4 +81,37 @@ use HasApiTokens, HasFactory, Notifiable;
     {
         return $this->hasMany(Order::class, 'referred_by_affiliate_id');
     }
+
+    // user can have many affiliate commissions
+    public function affiliateCommissions(): HasMany
+    {
+        return $this->hasMany(AffiliateCommission::class, 'affiliate_user_id');
+    }
+
+    // user can have many size recommendations
+    public function sizeRecommendations(): HasMany
+    {
+        return $this->hasMany(SizeRecommendation::class);
+    }
+
+    // Helper method untuk generate affiliate code
+    public function generateAffiliateCode(): string
+    {
+        return strtoupper(substr($this->username, 0, 4) . rand(1000, 9999));
+    }
+
+    // Helper method untuk activate affiliate
+    public function activateAffiliate(): void
+    {
+        $this->update([
+            'is_affiliate' => true,
+            'affiliate_code' => $this->generateAffiliateCode(),
+        ]);
+    }
+
+    // Helper method untuk check if user is affiliate
+    public function isAffiliate(): bool
+    {
+        return $this->is_affiliate;
+    }
 }
