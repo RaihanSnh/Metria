@@ -37,21 +37,6 @@ class PostItem extends Model
         return $this->morphTo('item', 'item_type', 'item_id');
     }
 
-    // Helper method untuk mendapatkan item berdasarkan type
-    public function getItemAttribute()
-    {
-        switch ($this->item_type) {
-            case 'product':
-                return Product::find($this->item_id);
-            case 'digital_wardrobe_item':
-                return DigitalWardrobeItem::find($this->item_id);
-            case 'wishlist_item':
-                return WishlistItem::find($this->item_id);
-            default:
-                return null;
-        }
-    }
-
     // Check if item has affiliate code
     public function hasAffiliateCode(): bool
     {

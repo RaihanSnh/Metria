@@ -2,7 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\FeedController;
 
 // Automated redirection based on auth status
 Route::get('/', function () {
@@ -48,13 +53,15 @@ Route::middleware('auth')->group(function () {
         return view('outfits.create');
     })->name('outfits.create');
     
-    Route::get('/products', function () {
-        return view('products.index');
-    })->name('products.index');
+    Route::resource('products', ProductController::class);
+    Route::resource('orders', OrderController::class);
+    Route::resource('stores', StoreController::class)->middleware('auth');
+    Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
     
-    Route::get('/posts/create', function () {
-        return view('posts.create');
-    })->name('posts.create');
+    Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+
+    Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
     
     Route::get('/profile', function () {
         return view('profile');
@@ -76,3 +83,5 @@ Route::middleware('auth')->group(function () {
         return view('affiliate.dashboard');
     })->name('affiliate.dashboard');
 });
+
+// require __DIR__.'/auth.php';

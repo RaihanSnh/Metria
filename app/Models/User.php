@@ -22,6 +22,7 @@ class User extends Authenticatable
         'full_name',
         'email',
         'password',
+        'is_seller',
         'profile_picture_url',
         'height_cm',
         'weight_kg',
@@ -50,10 +51,10 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_affiliate' => 'boolean',
-        ];
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_affiliate' => 'boolean',
+    ];
     }
 
     public function orders()
@@ -89,5 +90,10 @@ class User extends Authenticatable
     public function isAffiliate(): bool
     {
         return $this->is_affiliate;
+    }
+
+    public function store()
+    {
+        return $this->hasOne(Store::class);
     }
 }

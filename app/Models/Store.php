@@ -4,12 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Store extends Model
 {
-use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -19,21 +17,13 @@ use HasFactory;
         'province',
     ];
 
-    // store belongs to a user (owner)
-    public function owner(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    // store has many product stocks
-    public function stock(): HasMany
+    public function products()
     {
-        return $this->hasMany(ProductStock::class);
-    }
-
-    // store has many allocated orders
-    public function allocatedOrders(): HasMany
-    {
-        return $this->hasMany(Order::class, 'allocated_store_id');
+        return $this->hasMany(Product::class);
     }
 }

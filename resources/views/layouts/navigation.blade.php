@@ -15,7 +15,7 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('feed')" :active="request()->routeIs('feed')">
+                    <x-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
                         {{ __('Feed') }}
                     </x-nav-link>
                     <x-nav-link :href="route('wardrobe.index')" :active="request()->routeIs('wardrobe.*')">
@@ -50,6 +50,16 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
+                        @if(Auth::user()->is_seller)
+                            <x-dropdown-link :href="route('stores.show', Auth::user()->store)">
+                                {{ __('My Shop') }}
+                            </x-dropdown-link>
+                        @else
+                            <x-dropdown-link :href="route('stores.create')">
+                                {{ __('Become a Seller') }}
+                            </x-dropdown-link>
+                        @endif
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -82,7 +92,7 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('feed')" :active="request()->routeIs('feed')">
+            <x-responsive-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
                 {{ __('Feed') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('wardrobe.index')" :active="request()->routeIs('wardrobe.*')">

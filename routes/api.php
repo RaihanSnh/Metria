@@ -8,6 +8,7 @@ use App\Http\Controllers\API\AffiliateController;
 use App\Http\Controllers\API\DigitalWardrobeController;
 use App\Http\Controllers\API\OutfitController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\API\ProductController as ApiProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -237,3 +238,5 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 }); 
+
+// Route::get('/products/search', [ApiProductController::class, 'search'])->name('api.products.search'); 
