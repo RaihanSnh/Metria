@@ -47,7 +47,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard');
+            return redirect()->intended(route('feed.index')); // Redirect to feed
         }
 
         return back()->withErrors([
@@ -96,7 +96,7 @@ class AuthController extends Controller
 
             Log::info('User registered successfully.', ['user_id' => $user->id]);
 
-        return redirect('/dashboard')->with('success', 'Registration successful! Welcome to Metria.');
+        return redirect()->route('feed.index')->with('success', 'Registration successful! Welcome to Metria.'); // Redirect to feed
         } catch (\Exception $e) {
             Log::critical('User creation failed.', ['exception' => $e->getMessage()]);
             return back()->with('error', 'An unexpected error occurred. Please try again.')->withInput();
@@ -131,7 +131,7 @@ class AuthController extends Controller
         ];
 
         $recent_posts = $user->posts()
-            ->with('postItems')
+            ->with('items.item') // Corrected relationship
             ->latest()
             ->limit(2)
             ->get();

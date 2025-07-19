@@ -10,6 +10,8 @@ use App\Services\SizeRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Enum;
 
 class ProductController extends Controller
@@ -47,6 +49,8 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('Product store method initiated.', ['request_data' => $request->all()]);
+        
         $user = Auth::user();
         $store = $user->store;
 
@@ -54,12 +58,11 @@ class ProductController extends Controller
             return redirect()->route('stores.create')->with('error', 'You must create a store before adding products.');
         }
 
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:1',
-            'condition' => 'required|in:boutique,archive',
+            'condition' => 'required|in:new,pre-loved',
             'clothing_type' => ['required', new Enum(ClothingType::class)],
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'materials' => 'required|array',
@@ -68,46 +71,40 @@ class ProductController extends Controller
             'genres.*' => 'exists:outfit_genres,id',
             'sizes' => 'required|array|min:1',
             'sizes.*.name' => 'required|string|max:255',
-            'sizes.*.bust' => 'nullable|integer',
-            'sizes.*.waist' => 'nullable|integer',
-            'sizes.*.hip' => 'nullable|integer',
+            'sizes.*.quantity' => 'required|integer|min:0', // Validate quantity for each size
+            'sizes.*.bust' => 'nullable|integer|min:0',
+            'sizes.*.waist' => 'nullable|integer|min:0',
+            'sizes.*.hip' => 'nullable|integer|min:0',
         ]);
+
+        if ($validator->fails()) {
+            Log::error('Product creation validation failed.', ['errors' => $validator->errors()->all()]);
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $validated = $validator->validated();
         
         DB::beginTransaction();
         try {
             $imagePath = $request->file('image')->store('products', 'public');
 
-            // A product is now unique by its name AND condition.
             $product = Product::firstOrCreate(
-                [
-                    'name' => $validated['name'],
-                    'condition' => $validated['condition'],
-                ],
+                ['name' => $validated['name'], 'condition' => $validated['condition']],
                 [
                     'description' => $validated['description'],
-                    'price' => $validated['price'], // This becomes the price for this specific condition
+                    'price' => $validated['price'],
                     'image_url' => $imagePath,
                     'clothing_type' => $validated['clothing_type'],
                 ]
             );
 
-            // Sync materials and genres. This should only happen if the product is newly created.
             if ($product->wasRecentlyCreated) {
                 $product->materials()->sync($validated['materials']);
                 $product->genres()->sync($validated['genres']);
-            }
-
-            // Attach the product to the seller's store with stock information.
-            // Use syncWithoutDetaching to avoid overwriting other stores' stock.
-            $store->products()->syncWithoutDetaching([
-                $product->id => ['stock' => $validated['stock']]
-            ]);
-            
-            // Create the size chart entries only if the product is new.
-            if ($product->wasRecentlyCreated) {
+                // Create size chart entries, but not stock here
                 foreach($validated['sizes'] as $sizeData) {
                     $product->sizeCharts()->create([
-                        'size_name' => $sizeData['name'],
+                        'size_label' => $sizeData['name'],
                         'bust_circumference_cm' => $sizeData['bust'],
                         'waist_circumference_cm' => $sizeData['waist'],
                         'hip_circumference_cm' => $sizeData['hip'],
@@ -115,14 +112,27 @@ class ProductController extends Controller
                 }
             }
 
+            // Correctly add stock for each size in the pivot table
+            $stockData = [];
+            foreach ($validated['sizes'] as $sizeData) {
+                $stockData[$sizeData['name']] = ['quantity' => $sizeData['quantity']];
+            }
+            // This is a simplified approach. A more robust way would be to updateOrCreate on the pivot.
+            // For now, let's just add the stock for this product from this store.
+            foreach ($validated['sizes'] as $sizeData) {
+                 DB::table('product_stock')->updateOrInsert(
+                    ['product_id' => $product->id, 'store_id' => $store->id, 'size' => $sizeData['name']],
+                    ['quantity' => $sizeData['quantity']]
+                );
+            }
+            
             DB::commit();
 
             return redirect()->route('stores.show', $store)->with('success', 'Product added successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // It's good practice to log the error.
-            // Log::error('Product creation failed: ' . $e->getMessage());
+            Log::error('Product creation failed in try-catch block.', ['exception' => $e]);
             return redirect()->back()->with('error', 'There was an error creating the product. Please try again.')->withInput();
         }
     }

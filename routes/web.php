@@ -8,11 +8,12 @@ use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\FeedController;
+use App\Http\Controllers\ProfileController;
 
 // Automated redirection based on auth status
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('dashboard');
+        return redirect()->route('feed.index'); // Redirect logged-in users to the feed
     }
     return redirect()->route('login');
 });
@@ -30,7 +31,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // Protected routes that require authentication
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+    // The old dashboard route now redirects to the feed
+    Route::get('/dashboard', function() {
+        return redirect()->route('feed.index');
+    })->name('dashboard');
     
     // Placeholder routes for navigation links
     Route::get('/feed', function () {
@@ -63,9 +67,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
     
-    Route::get('/profile', function () {
-        return view('profile');
-    })->name('profile');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
 
     Route::get('/profile/edit', function () {
         return view('profile.edit');

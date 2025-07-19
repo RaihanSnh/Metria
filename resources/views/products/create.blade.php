@@ -33,12 +33,6 @@
                                 <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price')" required />
                                 <x-input-error :messages="$errors->get('price')" class="mt-2" />
                             </div>
-                            <!-- Initial Stock -->
-                             <div>
-                                <x-input-label for="stock" :value="__('Initial Stock')" />
-                                <x-text-input id="stock" class="block mt-1 w-full" type="number" name="stock" :value="old('stock')" required />
-                                <x-input-error :messages="$errors->get('stock')" class="mt-2" />
-                            </div>
                         </div>
 
                         <!-- Condition -->
@@ -46,11 +40,11 @@
                             <x-input-label :value="__('Condition')" />
                             <div class="flex items-center space-x-4 mt-2">
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="condition" value="boutique" class="text-indigo-600" checked>
+                                    <input type="radio" name="condition" value="new" class="text-indigo-600" checked>
                                     <span class="ml-2">Boutique (New)</span>
                                 </label>
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="condition" value="archive" class="text-indigo-600">
+                                    <input type="radio" name="condition" value="pre-loved" class="text-indigo-600">
                                     <span class="ml-2">Archive (Pre-loved/etc)</span>
                                 </label>
                             </div>
@@ -96,26 +90,30 @@
 
                         <!-- Dynamic Size Chart -->
                         <div class="mt-6">
-                            <h3 class="text-lg font-medium text-gray-900">Size Chart</h3>
+                            <h3 class="text-lg font-medium text-gray-900">Sizes & Stock</h3>
                             <div class="mt-2 space-y-4">
                                 <template x-for="(size, index) in sizes" :key="index">
                                     <div class="p-4 border rounded-md flex items-end space-x-4">
-                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 flex-grow">
+                                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 flex-grow">
                                             <div>
-                                                <label class="text-sm">Size Name (e.g., S, M, All Size)</label>
-                                                <input type="text" :name="`sizes[${index}][name]`" class="block mt-1 w-full text-sm" placeholder="S">
+                                                <label class="text-sm">Size Name</label>
+                                                <input type="text" :name="`sizes[${index}][name]`" x-model="size.name" class="block mt-1 w-full text-sm" placeholder="S" required>
+                                            </div>
+                                             <div>
+                                                <label class="text-sm">Quantity</label>
+                                                <input type="number" :name="`sizes[${index}][quantity]`" x-model="size.quantity" class="block mt-1 w-full text-sm" placeholder="10" required>
                                             </div>
                                             <div>
                                                 <label class="text-sm">Bust (cm)</label>
-                                                <input type="number" :name="`sizes[${index}][bust]`" class="block mt-1 w-full text-sm" placeholder="90">
+                                                <input type="number" :name="`sizes[${index}][bust]`" x-model="size.bust" class="block mt-1 w-full text-sm" placeholder="90">
                                             </div>
                                             <div>
                                                 <label class="text-sm">Waist (cm)</label>
-                                                <input type="number" :name="`sizes[${index}][waist]`" class="block mt-1 w-full text-sm" placeholder="70">
+                                                <input type="number" :name="`sizes[${index}][waist]`" x-model="size.waist" class="block mt-1 w-full text-sm" placeholder="70">
                                             </div>
                                             <div>
                                                 <label class="text-sm">Hip (cm)</label>
-                                                <input type="number" :name="`sizes[${index}][hip]`" class="block mt-1 w-full text-sm" placeholder="95">
+                                                <input type="number" :name="`sizes[${index}][hip]`" x-model="size.hip" class="block mt-1 w-full text-sm" placeholder="95">
                                             </div>
                                         </div>
                                         <button type="button" @click="removeSize(index)" class="text-red-500 hover:text-red-700">&times;</button>
@@ -147,9 +145,9 @@
     <script>
         function productForm() {
             return {
-                sizes: [{ name: '', bust: '', waist: '', hip: '' }],
+                sizes: [{ name: '', quantity: '', bust: '', waist: '', hip: '' }],
                 addSize() {
-                    this.sizes.push({ name: '', bust: '', waist: '', hip: '' });
+                    this.sizes.push({ name: '', quantity: '', bust: '', waist: '', hip: '' });
                 },
                 removeSize(index) {
                     this.sizes.splice(index, 1);

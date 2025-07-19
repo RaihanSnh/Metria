@@ -22,7 +22,27 @@
     <div class="min-h-screen">
         <!-- Page Content -->
         <main>
-            @yield('content')
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-4">
+                @if ($errors->any())
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                        <p class="font-bold">There were some errors with your submission:</p>
+                        <ul class="mt-2 list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                
+                @if(session('error'))
+                     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                        <p class="font-bold">Error</p>
+                        <p>{{ session('error') }}</p>
+                    </div>
+                @endif
+            </div>
+
+            {{ $slot }}
         </main>
     </div>
 
