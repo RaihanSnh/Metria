@@ -80,23 +80,23 @@ class AuthController extends Controller
         }
 
         try {
-            $user = User::create([
-                'username' => $request->username,
-                'full_name' => $request->full_name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'height_cm' => $request->height_cm,
-                'weight_kg' => $request->weight_kg,
-                'bust_circumference_cm' => $request->bust_circumference_cm,
-                'waist_circumference_cm' => $request->waist_circumference_cm,
-                'hip_circumference_cm' => $request->hip_circumference_cm,
-            ]);
+        $user = User::create([
+            'username' => $request->username,
+            'full_name' => $request->full_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'height_cm' => $request->height_cm,
+            'weight_kg' => $request->weight_kg,
+            'bust_circumference_cm' => $request->bust_circumference_cm,
+            'waist_circumference_cm' => $request->waist_circumference_cm,
+            'hip_circumference_cm' => $request->hip_circumference_cm,
+        ]);
 
-            Auth::login($user);
+        Auth::login($user);
 
             Log::info('User registered successfully.', ['user_id' => $user->id]);
 
-            return redirect('/dashboard')->with('success', 'Registration successful! Welcome to Metria.');
+        return redirect('/dashboard')->with('success', 'Registration successful! Welcome to Metria.');
         } catch (\Exception $e) {
             Log::critical('User creation failed.', ['exception' => $e->getMessage()]);
             return back()->with('error', 'An unexpected error occurred. Please try again.')->withInput();
@@ -122,7 +122,7 @@ class AuthController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-
+        
         $stats = [
             'orders_placed' => $user->orders()->count(),
             'wishlist_items' => $user->wishlistItems()->count(),

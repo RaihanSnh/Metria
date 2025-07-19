@@ -44,22 +44,4 @@
             </x-primary-button>
         </div>
     </form>
-</x-guest-layout>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const submitButton = form.querySelector('button[type="submit"]');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const buttonText = document.getElementById('button-text');
-
-    form.addEventListener('submit', function() {
-        submitButton.disabled = true;
-        loadingSpinner.classList.remove('hidden');
-        buttonText.textContent = 'Signing in...';
-    });
-});
-</script>
-@endpush
-@endsection 
+</x-guest-layout> 

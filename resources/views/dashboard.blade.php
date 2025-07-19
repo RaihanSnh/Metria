@@ -1,36 +1,30 @@
-@extends('layouts.app')
-
-@section('title', 'Dashboard')
-
-@section('content')
 <x-app-layout>
-    @section('title', 'Dashboard')
+    <x-slot name="header">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-2xl font-bold leading-7 text-gray-800 sm:text-3xl sm:truncate">
+                    Welcome back, {{ auth()->user()->first_name }}!
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">
+                    Here's a snapshot of your Metria activity.
+                </p>
+            </div>
+            <div class="mt-4 flex md:mt-0 md:ml-4">
+                <div class="inline-block rounded-full overflow-hidden w-16 h-16">
+                    @if(auth()->user()->profile_picture_url)
+                        <img src="{{ auth()->user()->profile_picture_url }}" alt="{{ auth()->user()->full_name }}" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full bg-primary-500 flex items-center justify-center text-white font-bold text-2xl">
+                            {{ substr(auth()->user()->full_name, 0, 1) }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Header -->
-            <div class="md:flex md:items-center md:justify-between mb-8">
-                <div class="flex-1 min-w-0">
-                    <h2 class="text-2xl font-bold leading-7 text-neutral-900 sm:text-3xl sm:truncate">
-                        Welcome back, {{ auth()->user()->first_name }}!
-                    </h2>
-                    <p class="mt-1 text-sm text-neutral-500">
-                        Here's a snapshot of your Metria activity.
-                    </p>
-                </div>
-                <div class="mt-4 flex md:mt-0 md:ml-4">
-                    <div class="inline-block rounded-full overflow-hidden w-16 h-16">
-                        @if(auth()->user()->profile_picture_url)
-                            <img src="{{ auth()->user()->profile_picture_url }}" alt="{{ auth()->user()->full_name }}" class="w-full h-full object-cover">
-                        @else
-                            <div class="w-full h-full bg-primary-500 flex items-center justify-center text-white font-bold text-2xl">
-                                {{ substr(auth()->user()->full_name, 0, 1) }}
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
             <!-- Stats -->
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="bg-white rounded-xl shadow-soft border border-neutral-200">
@@ -277,5 +271,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
-@endsection 
+</x-app-layout> 
