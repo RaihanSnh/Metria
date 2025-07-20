@@ -1,76 +1,50 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\StoreController;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\FeedController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StoreController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\FeedController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('feed.index');
-    }
-    return redirect()->route('login');
+    return view('welcome');
 });
 
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
-});
+Route::get('/feed', [FeedController::class, 'index'])->middleware(['auth', 'verified'])->name('feed');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/feed', function () {
-        return view('feed');
-    })->name('feed');
-    
-    Route::get('/wardrobe', function () {
-        return view('wardrobe.index');
-    })->name('wardrobe.index');
-    
-    Route::get('/wardrobe/create', function () {
-        return view('wardrobe.create');
-    })->name('wardrobe.create');
-    
-    Route::get('/outfits', function () {
-        return view('outfits.index');
-    })->name('outfits.index');
-    
-    Route::get('/outfits/create', function () {
-        return view('outfits.create');
-    })->name('outfits.create');
-    
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     Route::resource('products', ProductController::class);
-    Route::resource('orders', OrderController::class);
-    Route::resource('stores', StoreController::class)->middleware('auth');
-    Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
-    
-    Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
-    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::resource('stores', StoreController::class);
+    Route::resource('posts', PostController::class);
+    Route::resource('orders', OrderController::class)->only(['index', 'show', 'store']);
+    Route::resource('wardrobe', \App\Http\Controllers\DigitalWardrobeController::class)->only(['index', 'create', 'store']);
 
-    Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
-    
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    // Wishlist Routes
+    Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/{product}', [\App\Http\Controllers\WishlistController::class, 'store'])->name('wishlist.store');
+    Route::delete('/wishlist/{product}', [\App\Http\Controllers\WishlistController::class, 'destroy'])->name('wishlist.destroy');
 
-    Route::get('/profile/edit', function () {
-        return view('profile.edit');
-    })->name('profile.edit');
-    
-    Route::get('/orders', function () {
-        return view('orders.index');
-    })->name('orders.index');
-    
-    Route::get('/affiliate/register', function () {
-        return view('affiliate.register');
-    })->name('affiliate.register');
-    
+    // Outfit Routes
+    Route::resource('outfits', \App\Http\Controllers\OutfitController::class);
 });
 
-// require __DIR__.'/auth.php';
+// Authentication Routes
+Route::get('login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('login', [AuthController::class, 'login']);
+Route::get('register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('register', [AuthController::class, 'register']);
+Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+Route::middleware('auth')->group(function() {
+    Route::get('/register/measurements', [AuthController::class, 'showMeasurementsForm'])->name('register.measurements');
+    Route::post('/register/measurements', [AuthController::class, 'saveMeasurements'])->name('register.measurements.store');
+});

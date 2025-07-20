@@ -39,4 +39,14 @@ class Product extends Model
     {
         return $this->hasMany(ProductSizeChart::class);
     }
+
+    public function stock()
+    {
+        return $this->hasMany(ProductStock::class);
+    }
+
+    public function wishlistedBy()
+    {
+        return $this->belongsToMany(User::class, 'wishlist_items');
+    }
 }

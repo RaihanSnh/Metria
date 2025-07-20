@@ -62,7 +62,7 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'buyer_user_id');
     }
 
-    public function wishlistItems()
+    public function wishlist()
     {
         return $this->belongsToMany(Product::class, 'wishlist_items');
     }

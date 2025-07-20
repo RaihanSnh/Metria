@@ -52,7 +52,7 @@ class PostController extends Controller
             DB::commit();
 
             // Redirect to the new feed page, which we will create next.
-            return redirect()->route('feed.index')->with('success', 'Post created successfully!');
+            return redirect()->route('feed')->with('success', 'Post created successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -85,13 +85,38 @@
                                     </div>
                                 </div>
 
-                                <form x-show="selectedSize" action="{{ route('orders.store') }}" method="POST" class="mt-4" style="display: none;">
-                                    @csrf
-                                    <input type="hidden" name="product_id" :value="variations[selectedCondition].id">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <input type="hidden" name="size" x-model="selectedSize">
-                                    <x-primary-button>Buy Now</x-primary-button>
-                                </form>
+                                <!-- Wishlist Button -->
+                                <div class="mt-4">
+                                    @auth
+                                        @if(Auth::user()->wishlist->contains($product))
+                                            <form action="{{ route('wishlist.destroy', $product) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="font-semibold text-red-600 hover:text-red-800">
+                                                    <i class="fas fa-heart-broken"></i> Remove from Wishlist
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('wishlist.store', $product) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="font-semibold text-indigo-600 hover:text-indigo-800">
+                                                    <i class="far fa-heart"></i> Add to Wishlist
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endauth
+                                </div>
+
+                                <!-- Buy Now Button -->
+                                <div class="mt-6">
+                                    <form action="{{ route('orders.store') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="product_id" :value="variations[selectedCondition].id">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="size" x-model="selectedSize">
+                                        <x-primary-button>Buy Now</x-primary-button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

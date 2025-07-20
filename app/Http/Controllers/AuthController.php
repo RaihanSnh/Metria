@@ -46,8 +46,13 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            
+            // Create and store API token
+            $user = Auth::user();
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-            return redirect()->intended(route('feed.index')); // Redirect to feed
+            return redirect()->intended(route('feed'))
+                ->with('api_token', $token);
         }
 
         return back()->withErrors([
@@ -67,11 +72,6 @@ class AuthController extends Controller
             'full_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Password::min(8)],
-            'height_cm' => 'required|integer|min:100|max:250',
-            'weight_kg' => 'required|numeric|min:30|max:200',
-            'bust_circumference_cm' => 'nullable|integer|min:50|max:150',
-            'waist_circumference_cm' => 'nullable|integer|min:50|max:150',
-            'hip_circumference_cm' => 'nullable|integer|min:50|max:150',
         ]);
 
         if ($validator->fails()) {
@@ -80,28 +80,52 @@ class AuthController extends Controller
         }
 
         try {
-        $user = User::create([
-            'username' => $request->username,
-            'full_name' => $request->full_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'height_cm' => $request->height_cm,
-            'weight_kg' => $request->weight_kg,
-            'bust_circumference_cm' => $request->bust_circumference_cm,
-            'waist_circumference_cm' => $request->waist_circumference_cm,
-            'hip_circumference_cm' => $request->hip_circumference_cm,
-        ]);
+            $user = User::create([
+                'username' => $request->username,
+                'full_name' => $request->full_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        Auth::login($user);
+            Auth::login($user);
 
             Log::info('User registered successfully.', ['user_id' => $user->id]);
 
-        return redirect()->route('feed.index')->with('success', 'Registration successful! Welcome to Metria.'); // Redirect to feed
+            return redirect()->route('register.measurements'); // Redirect to measurements page
         } catch (\Exception $e) {
             Log::critical('User creation failed.', ['exception' => $e->getMessage()]);
             return back()->with('error', 'An unexpected error occurred. Please try again.')->withInput();
         }
     }
+
+    /**
+     * Show the measurements form after registration.
+     */
+    public function showMeasurementsForm()
+    {
+        return view('auth.measurements');
+    }
+
+    /**
+     * Store the user's measurements.
+     */
+    public function saveMeasurements(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'height_cm' => 'required|integer|min:100|max:250',
+            'weight_kg' => 'required|numeric|min:30|max:200',
+            'bust_circumference_cm' => 'nullable|integer|min:50|max:150',
+            'waist_circumference_cm' => 'nullable|integer|min:50|max:150',
+            'hip_circumference_cm' => 'nullable|integer|min:50|max:150',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('feed')->with('success', 'Welcome to Metria!');
+    }
+
 
     /**
      * Handle logout request
