@@ -71,9 +71,6 @@ Route::middleware('auth')->group(function () {
         return view('affiliate.register');
     })->name('affiliate.register');
     
-    Route::get('/affiliate/dashboard', function () {
-        return view('affiliate.dashboard');
-    })->name('affiliate.dashboard');
 });
 
 // require __DIR__.'/auth.php';

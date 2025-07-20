@@ -52,7 +52,7 @@ class StoreController extends Controller
         // We'll also mark the user as a seller.
         $user->update(['is_seller' => true]);
 
-        return redirect()->route('dashboard')->with('success', 'Congratulations! Your store has been created.');
+        return redirect()->route('stores.index')->with('success', 'Congratulations! Your store has been created.');
     }
 
     /**

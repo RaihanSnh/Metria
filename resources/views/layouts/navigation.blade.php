@@ -5,24 +5,24 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('feed.index') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
                         {{ __('Feed') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('wardrobe.index')" :active="request()->routeIs('wardrobe.*')">
-                        {{ __('Wardrobe') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('outfits.index')" :active="request()->routeIs('outfits.*')">
-                        {{ __('Outfits') }}
-                    </x-nav-link>
                     <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
                         {{ __('Shop') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('wardrobe.index')" :active="request()->routeIs('wardrobe.index')">
+                        {{ __('Wardrobe') }}
+                    </x-nav-link>
+                     <x-nav-link :href="route('outfits.index')" :active="request()->routeIs('outfits.index')">
+                        {{ __('Outfits') }}
                     </x-nav-link>
                 </div>
             </div>

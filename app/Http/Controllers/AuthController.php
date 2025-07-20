@@ -117,34 +117,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Show dashboard
-     */
-    public function dashboard()
-    {
-        $user = Auth::user();
-        
-        $stats = [
-            'orders_placed' => $user->orders()->count(),
-            'wishlist_items' => $user->wishlistItems()->count(),
-            'affiliate_earnings' => $user->affiliateCommissions()->sum('commission_amount'),
-            'posts_created' => $user->posts()->count(),
-        ];
-
-        $recent_posts = $user->posts()
-            ->with('items.item') // Corrected relationship
-            ->latest()
-            ->limit(2)
-            ->get();
-
-        $recent_wardrobe_items = $user->digitalWardrobeItems()
-            ->latest()
-            ->limit(5)
-            ->get();
-
-        return view('dashboard', compact('user', 'stats', 'recent_posts', 'recent_wardrobe_items'));
-    }
-
-    /**
      * API Login
      */
     public function apiLogin(Request $request)

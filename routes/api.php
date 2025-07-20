@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
+    Route::get('/affiliate/dashboard-api', [AffiliateController::class, 'getDashboard']);
+
     // Posts (Social Feed & Community)
     Route::prefix('posts')->group(function () {
         Route::get('/', [PostController::class, 'index']);
