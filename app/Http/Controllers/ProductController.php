@@ -101,13 +101,13 @@ class ProductController extends Controller
             if ($product->wasRecentlyCreated) {
                 $product->materials()->sync($validated['materials']);
                 $product->genres()->sync($validated['genres']);
-                // Create size chart entries, but not stock here
+                // Create size chart entries with CORRECT column names
                 foreach($validated['sizes'] as $sizeData) {
                     $product->sizeCharts()->create([
                         'size_label' => $sizeData['name'],
-                        'bust_circumference_cm' => $sizeData['bust'],
-                        'waist_circumference_cm' => $sizeData['waist'],
-                        'hip_circumference_cm' => $sizeData['hip'],
+                        'chest_cm' => $sizeData['bust'],
+                        'waist_cm' => $sizeData['waist'],
+                        'hip_cm' => $sizeData['hip'],
                     ]);
                 }
             }
@@ -142,16 +142,28 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        // Find all variations (Boutique/Archive) of this product by name
+        // Eager load ALL relationships for the base product
+        $product->load('materials', 'genres', 'sizeCharts');
+
+        // Find all variations (new/pre-loved) of this product by name
         $productVariations = Product::where('name', $product->name)->get()->keyBy('condition');
+
+        // Get the total stock for each size across all stores for each variation
+        $stockBySize = [];
+        foreach ($productVariations as $condition => $variant) {
+            $stockBySize[$condition] = DB::table('product_stock')
+                ->where('product_id', $variant->id)
+                ->groupBy('size')
+                ->select('size', DB::raw('SUM(quantity) as total_quantity'))
+                ->pluck('total_quantity', 'size');
+        }
 
         $recommendedSize = null;
         if (Auth::check()) {
-            // Recommendation might be based on the "base" product
             $recommendedSize = $this->sizeRecommendationService->getRecommendation($product, Auth::user());
         }
 
-        return view('products.show', compact('product', 'productVariations', 'recommendedSize'));
+        return view('products.show', compact('product', 'productVariations', 'stockBySize', 'recommendedSize'));
     }
 
     /**

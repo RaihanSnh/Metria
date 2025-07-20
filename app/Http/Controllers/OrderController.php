@@ -43,22 +43,24 @@ class OrderController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'size' => 'required|string', // Validate the size
         ]);
 
         $product = Product::findOrFail($request->product_id);
         $user = Auth::user();
+        $size = $request->size;
 
         // Start a database transaction to ensure data integrity
         DB::beginTransaction();
 
         try {
-            // 1. Use the FairAllocationService to get the allocated store
-            $allocatedStore = $this->allocationService->allocateStore($product);
+            // 1. Use the FairAllocationService with size
+            $allocatedStore = $this->allocationService->allocateStore($product, $size);
 
             if (!$allocatedStore) {
                 // If no store can be allocated, roll back and show an error
                 DB::rollBack();
-                return redirect()->back()->with('error', 'Sorry, this product is currently unavailable from any store.');
+                return redirect()->back()->with('error', 'Sorry, this size is currently unavailable from any store.');
             }
 
             // 2. Create the Order
@@ -68,26 +70,28 @@ class OrderController extends Controller
                 'total_amount' => $product->price * $request->quantity,
             ]);
 
-            // 3. Create the Order Item
+            // 3. Create the Order Item, including size
             $order->items()->create([
                 'product_id' => $product->id,
                 'store_id' => $allocatedStore->id,
                 'quantity' => $request->quantity,
                 'price' => $product->price,
+                'size' => $size, // Store the size
             ]);
 
-            // 4. Decrement the stock for the allocated store
+            // 4. Decrement the stock for the allocated store AND size
             DB::table('product_stock')
                 ->where('store_id', $allocatedStore->id)
                 ->where('product_id', $product->id)
-                ->decrement('stock', $request->quantity);
+                ->where('size', $size) // Decrement the correct size
+                ->decrement('quantity', $request->quantity);
 
             // If everything is fine, commit the transaction
             DB::commit();
 
             // Redirect to a success page or order details page
             // We'll create this view next.
-            return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully! Your order has been allocated to a store.');
+            return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully!');
 
         } catch (\Exception $e) {
             // If anything goes wrong, roll back the transaction

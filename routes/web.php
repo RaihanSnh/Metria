@@ -10,15 +10,13 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\ProfileController;
 
-// Automated redirection based on auth status
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('feed.index'); // Redirect logged-in users to the feed
+        return redirect()->route('feed.index');
     }
     return redirect()->route('login');
 });
 
-// Authentication routes protected by 'guest' middleware
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -26,17 +24,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Logout route
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// Protected routes that require authentication
 Route::middleware('auth')->group(function () {
-    // The old dashboard route now redirects to the feed
-    Route::get('/dashboard', function() {
-        return redirect()->route('feed.index');
-    })->name('dashboard');
-    
-    // Placeholder routes for navigation links
     Route::get('/feed', function () {
         return view('feed');
     })->name('feed');
