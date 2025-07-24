@@ -17,6 +17,13 @@ use HasFactory;
         'item_name',
         'item_image_url',
         'clothing_type',
+        'color',
+        'brand',
+        'size',
+        'material',
+        'purchase_date',
+        'price',
+        'notes',
     ];
 
     protected $casts = [

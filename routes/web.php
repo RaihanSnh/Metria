@@ -9,9 +9,13 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect()->route('feed');
+    }
+    return redirect()->route('login');
 });
 
 Route::get('/feed', [FeedController::class, 'index'])->middleware(['auth', 'verified'])->name('feed');
@@ -26,7 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('stores', StoreController::class);
     Route::resource('posts', PostController::class);
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'store']);
-    Route::resource('wardrobe', \App\Http\Controllers\DigitalWardrobeController::class)->only(['index', 'create', 'store']);
+    Route::resource('wardrobe', \App\Http\Controllers\DigitalWardrobeController::class);
 
     // Wishlist Routes
     Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index'])->name('wishlist.index');

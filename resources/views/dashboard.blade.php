@@ -23,15 +23,15 @@
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                                                     {{ $post->items->count() }} items
                                                 </span>
-                                            @endif
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
+                                @endforeach
+                            </div>
+                        @else
                         <p>{{ __("You're logged in!") }}</p>
-                    @endif
+                        @endif
                 </div>
             </div>
         </div>

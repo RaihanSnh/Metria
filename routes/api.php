@@ -69,16 +69,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/products/{product}/size-recommendation', [OrderController::class, 'getSizeRecommendation']);
 
     // Digital Wardrobe
-    Route::prefix('wardrobe')->group(function () {
-        Route::get('/', [DigitalWardrobeController::class, 'index']);
-        Route::post('/', [DigitalWardrobeController::class, 'store']);
-        Route::get('/stats', [DigitalWardrobeController::class, 'getStats']);
-        Route::get('/search', [DigitalWardrobeController::class, 'search']);
-        Route::get('/for-outfit', [DigitalWardrobeController::class, 'getForOutfit']);
-        Route::get('/type/{clothingType}', [DigitalWardrobeController::class, 'getByType']);
-        Route::get('/{digitalWardrobeItem}', [DigitalWardrobeController::class, 'show']);
-        Route::put('/{digitalWardrobeItem}', [DigitalWardrobeController::class, 'update']);
-        Route::delete('/{digitalWardrobeItem}', [DigitalWardrobeController::class, 'destroy']);
+    Route::prefix('wardrobe')->as('api.wardrobe.')->group(function () {
+        Route::get('/', [DigitalWardrobeController::class, 'index'])->name('index');
+        Route::post('/', [DigitalWardrobeController::class, 'store'])->name('store');
+        Route::get('/stats', [DigitalWardrobeController::class, 'getStats'])->name('stats');
+        Route::get('/search', [DigitalWardrobeController::class, 'search'])->name('search');
+        Route::get('/for-outfit', [DigitalWardrobeController::class, 'getForOutfit'])->name('for-outfit');
+        Route::get('/type/{clothingType}', [DigitalWardrobeController::class, 'getByType'])->name('by-type');
+        Route::get('/{digitalWardrobeItem}', [DigitalWardrobeController::class, 'show'])->name('show');
+        Route::put('/{digitalWardrobeItem}', [DigitalWardrobeController::class, 'update'])->name('update');
+        Route::delete('/{digitalWardrobeItem}', [DigitalWardrobeController::class, 'destroy'])->name('destroy');
     });
 
     // Outfit Constructor
