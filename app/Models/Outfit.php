@@ -14,11 +14,6 @@ class Outfit extends Model
 
     protected $fillable = ['user_id', 'name', 'items'];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
         'items' => 'array',
     ];

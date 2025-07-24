@@ -42,21 +42,15 @@
                                     </div>
                                     <div class="flex-grow grid grid-cols-2 grid-rows-2 gap-1 p-2 bg-gray-50 min-h-[200px]">
                                         @php
-                                            // Direct DB access to avoid relationship call
-                                            $items = json_decode($outfit->getRawOriginal('items') ?? '[]', true);
-                                            $canvasItems = collect($items)->take(4);
+                                            // Direct debug - uncomment if needed
+                                            // dd($outfit->items);
+                                            $canvasItems = collect($outfit->items ?? [])->take(4);
                                         @endphp
 
                                         @if($canvasItems->count() > 0)
                                             @foreach($canvasItems as $item)
-                                                <div class="w-full h-full bg-cover bg-center rounded min-h-[90px]"
-                                                    style="background-image: url('{{ 
-                                                        isset($item['image_url']) 
-                                                            ? (Str::startsWith($item['image_url'], ['http://', 'https://']) 
-                                                                ? $item['image_url'] 
-                                                                : Storage::url($item['image_url']))
-                                                            : asset('images/placeholder.jpg') 
-                                                    }}')">
+                                                <div class="w-full h-full bg-cover bg-center rounded min-h-[90px]" 
+                                                    style="background-image: url('{{ $item['image_url'] ?? 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JdGVtPC90ZXh0Pjwvc3ZnPg==' }}')">
                                                 </div>
                                             @endforeach
                                             

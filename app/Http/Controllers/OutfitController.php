@@ -35,38 +35,28 @@ class OutfitController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
-            'items' => 'required|json',
+            'items' => 'required|string',
         ]);
 
-        $items = json_decode($validated['items'], true);
-
-        if (empty($items)) {
-            return back()->with('error', 'An outfit must have at least one item.')->withInput();
-        }
-
-        $outfit = Auth::user()->outfits()->create([
-            'name' => $validated['name'],
-        ]);
-
-        foreach ($items as $itemData) {
-            $modelType = null;
-            if ($itemData['type'] === 'digital_wardrobe_item') {
-                $modelType = \App\Models\DigitalWardrobeItem::class;
-            } elseif ($itemData['type'] === 'product') {
-                $modelType = \App\Models\Product::class;
-            }
-
-            if ($modelType) {
-                $outfit->items()->create([
-                    'itemable_id' => $itemData['id'],
-                    'itemable_type' => $modelType,
-                ]);
-            }
-        }
+        // Decode the JSON items from the form
+        $items = json_decode($request->items, true);
         
-        return redirect()->route('outfits.index')->with('success', 'Outfit created successfully!');
+        // Validate that we have items
+        if (empty($items)) {
+            return redirect()->back()->with('error', 'Please add at least one item to your outfit.');
+        }
+
+        // Create the outfit with the JSON items
+        $outfit = Outfit::create([
+            'user_id' => auth()->id(),
+            'name' => $request->name,
+            'items' => $items, // This will be cast to JSON by the model
+        ]);
+
+        return redirect()->route('outfits.index')
+            ->with('success', 'Outfit created successfully!');
     }
 
     /**
@@ -83,8 +73,8 @@ class OutfitController extends Controller
                 ->with('error', 'You do not have permission to view this outfit.');
         }
 
-        // Parse the JSON items into a collection
-        $outfitItems = collect(json_decode($outfit->items, true) ?? []);
+        // The items are already cast to array via the model
+        $outfitItems = collect($outfit->items ?? []);
         
         return view('outfits.show', [
             'outfit' => $outfit,
