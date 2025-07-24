@@ -1,3 +1,8 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -35,13 +40,37 @@
                                         <h3 class="font-bold text-lg truncate">{{ $outfit->name }}</h3>
                                         <p class="text-sm text-gray-500">{{ $outfit->created_at->format('M d, Y') }}</p>
                                     </div>
-                                    <div class="flex-grow grid grid-cols-2 grid-rows-2 gap-1 p-2 bg-gray-50">
-                                        @foreach ($outfit->items->take(4) as $item)
-                                            @if($item->itemable)
-                                            <div class="w-full h-full bg-cover bg-center rounded" style="background-image: url('{{ Storage::url($item->itemable->image_url) }}')">
+                                    <div class="flex-grow grid grid-cols-2 grid-rows-2 gap-1 p-2 bg-gray-50 min-h-[200px]">
+                                        @php
+                                            // Direct DB access to avoid relationship call
+                                            $items = json_decode($outfit->getRawOriginal('items') ?? '[]', true);
+                                            $canvasItems = collect($items)->take(4);
+                                        @endphp
+
+                                        @if($canvasItems->count() > 0)
+                                            @foreach($canvasItems as $item)
+                                                <div class="w-full h-full bg-cover bg-center rounded min-h-[90px]"
+                                                    style="background-image: url('{{ 
+                                                        isset($item['image_url']) 
+                                                            ? (Str::startsWith($item['image_url'], ['http://', 'https://']) 
+                                                                ? $item['image_url'] 
+                                                                : Storage::url($item['image_url']))
+                                                            : asset('images/placeholder.jpg') 
+                                                    }}')">
+                                                </div>
+                                            @endforeach
+                                            
+                                            {{-- Fill remaining slots with placeholders --}}
+                                            @for($i = $canvasItems->count(); $i < 4; $i++)
+                                                <div class="w-full h-full bg-gray-200 rounded min-h-[90px] flex items-center justify-center">
+                                                    <span class="text-gray-400 text-xs">Empty</span>
+                                                </div>
+                                            @endfor
+                                        @else
+                                            <div class="col-span-2 row-span-2 flex items-center justify-center text-gray-400">
+                                                <p>No items in this outfit yet.</p>
                                             </div>
-                                            @endif
-                                        @endforeach
+                                        @endif
                                     </div>
                                     <div class="p-4 border-t flex justify-end">
                                         <a href="{{ route('outfits.show', $outfit) }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">View Details</a>
@@ -49,7 +78,6 @@
                                 </div>
                             @endforeach
                         </div>
-
                         <div class="mt-8">
                             {{ $outfits->links() }}
                         </div>
@@ -58,4 +86,4 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>

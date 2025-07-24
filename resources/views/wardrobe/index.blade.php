@@ -14,18 +14,18 @@
     </x-slot>
 
     <div class="py-12"
-         x-data="{
+         x-data='{
             loading: false,
             items: @json($wardrobeItems->items()),
             filteredItems: @json($wardrobeItems->items()),
             totalItems: {{ $wardrobeItems->total() }},
-            selectedCategory: 'all',
+            selectedCategory: "all",
             filterItems() {
-                this.filteredItems = this.selectedCategory === 'all'
+                this.filteredItems = this.selectedCategory === "all"
                     ? this.items
                     : this.items.filter(item => item.clothing_type === this.selectedCategory);
             }
-        }"
+         }'
          x-init="filterItems()">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             

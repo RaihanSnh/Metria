@@ -6,30 +6,52 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphedByMany;
-
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Outfit extends Model
 {
-use HasFactory;
+    use HasFactory;
 
-    protected $fillable = ['user_id', 'name'];
+    protected $fillable = ['user_id', 'name', 'items'];
 
-    // this outfit belongs to a user
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'items' => 'array',
+    ];
+
+    /**
+     * Get the user that owns the outfit.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // this outfit has many products
+    /**
+     * Get all of the products for the outfit.
+     */
     public function products(): MorphedByMany
     {
         return $this->morphedByMany(Product::class, 'itemable', 'outfit_items');
     }
 
-    // this outfit has many digital wardrobe items
+    /**
+     * Get all of the digital wardrobe items for the outfit.
+     */
     public function digitalWardrobeItems(): MorphedByMany
     {
         return $this->morphedByMany(DigitalWardrobeItem::class, 'itemable', 'outfit_items');
+    }
+
+    /**
+     * Get all of the items for the outfit.
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(OutfitItem::class);
     }
 }

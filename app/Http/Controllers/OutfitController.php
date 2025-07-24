@@ -68,4 +68,27 @@ class OutfitController extends Controller
         
         return redirect()->route('outfits.index')->with('success', 'Outfit created successfully!');
     }
+
+    /**
+     * Display the specified outfit.
+     *
+     * @param  \App\Models\Outfit  $outfit
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Outfit $outfit)
+    {
+        // Check if user owns this outfit
+        if ($outfit->user_id !== auth()->id()) {
+            return redirect()->route('outfits.index')
+                ->with('error', 'You do not have permission to view this outfit.');
+        }
+
+        // Parse the JSON items into a collection
+        $outfitItems = collect(json_decode($outfit->items, true) ?? []);
+        
+        return view('outfits.show', [
+            'outfit' => $outfit,
+            'outfitItems' => $outfitItems
+        ]);
+    }
 }

@@ -8,7 +8,41 @@
         </div>
     </x-slot>
 
-    <div class="py-12" x-data="wardrobeForm()">
+    <div class="py-12"
+         x-data="{
+            imagePreview: null,
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                this.processFile(file);
+            },
+            handleDrop(e) {
+                const file = e.dataTransfer.files[0];
+                this.processFile(file);
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                this.$refs.imageInput.files = dt.files;
+            },
+            processFile(file) {
+                if (!file || !file.type.startsWith('image/')) {
+                    alert('Please select a valid image file');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => this.imagePreview = e.target.result;
+                reader.readAsDataURL(file);
+            },
+            clearImage() {
+                this.imagePreview = null;
+                this.$refs.imageInput.value = '';
+            }
+         }"
+         @dragover.prevent
+         @drop.prevent
+         x-init="() => console.log('Upload form ready')">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -71,7 +105,15 @@
                                                 </button>
                                             </div>
                                             
-                                            <input @change="handleFileSelect" type="file" id="image" name="image" class="sr-only" accept="image/*" required>
+                                            <input 
+                                                x-ref="imageInput"
+                                                @change="handleFileSelect"
+                                                type="file"
+                                                id="image"
+                                                name="image"
+                                                class="sr-only"
+                                                accept="image/*"
+                                                required>
                                         </label>
                                         <x-input-error :messages="$errors->get('image')" class="mt-2" />
                                     </div>
@@ -188,68 +230,4 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-        function wardrobeForm() {
-            return {
-                imagePreview: null,
-                
-                init() {
-                    console.log('Wardrobe form initialized');
-                },
-                
-                handleFileSelect(event) {
-                    console.log('File selected:', event.target.files[0]);
-                    const file = event.target.files[0];
-                    if (file) {
-                        this.processFile(file);
-                    }
-                },
-                
-                handleDrop(event) {
-                    console.log('File dropped:', event.dataTransfer.files[0]);
-                    const file = event.dataTransfer.files[0];
-                    if (file) {
-                        this.processFile(file);
-                        
-                        // Update the file input
-                        const input = document.getElementById('image');
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
-                        input.files = dataTransfer.files;
-                    }
-                },
-                
-                processFile(file) {
-                    if (file && file.type.startsWith('image/')) {
-                        // Check file size (5MB limit)
-                        if (file.size > 5 * 1024 * 1024) {
-                            alert('File size must be less than 5MB');
-                            return;
-                        }
-                        
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.imagePreview = e.target.result;
-                            console.log('Image preview set');
-                        };
-                        reader.onerror = (e) => {
-                            console.error('FileReader error:', e);
-                        };
-                        reader.readAsDataURL(file);
-                    } else {
-                        alert('Please select a valid image file');
-                    }
-                },
-                
-                clearImage() {
-                    this.imagePreview = null;
-                    document.getElementById('image').value = '';
-                    console.log('Image cleared');
-                }
-            }
-        }
-    </script>
-    @endpush
 </x-app-layout>

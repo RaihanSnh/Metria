@@ -1,3 +1,8 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -5,7 +10,22 @@
         </h2>
     </x-slot>
 
-    <div class="py-12" x-data="outfitConstructor()">
+    <div class="py-12" 
+         x-data="{ 
+            outfitName: '', 
+            outfitItems: [],
+            formAction: '{{ route('outfits.store') }}',
+            
+            addItem(item) {
+                if (!this.outfitItems.some(i => i.id === item.id)) {
+                    this.outfitItems.push(item);
+                }
+            },
+            
+            removeItem(index) {
+                this.outfitItems.splice(index, 1);
+            }
+         }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <form :action="formAction" method="POST">
                 @csrf
@@ -31,9 +51,11 @@
                                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                                     <template x-for="(item, index) in outfitItems" :key="item.id">
                                         <div class="relative group">
-                                            <img :src="item.image_url" :alt="item.item_name" class="w-full h-auto object-cover rounded-lg">
+                                            <img :src="item.image_url" 
+                                                 :alt="item.item_name" 
+                                                 class="w-full h-auto object-cover rounded-lg">
                                             <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button @click.prevent="removeItem(index)" class="text-white text-2xl">&times;</button>
+                                                <button @click.prevent="removeItem(index)" class="text-white text-2xl">×</button>
                                             </div>
                                         </div>
                                     </template>
@@ -46,24 +68,36 @@
                             <!-- Right Side: Wardrobe Items -->
                             <div class="bg-gray-50 p-4 rounded-lg overflow-y-auto max-h-[60vh]">
                                 <h3 class="text-lg font-semibold text-gray-700 mb-4">My Wardrobe</h3>
-                                @forelse($wardrobeItems as $type => $items)
-                                    <div class="mb-6">
-                                        <h4 class="font-bold capitalize text-gray-600 mb-2">{{ str_replace('_', ' ', $type) }}</h4>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            @foreach($items as $item)
-                                                <div @click="addItem(@js($item))" class="cursor-pointer group relative">
-                                                    <img src="{{ Storage::url($item->image_url) }}" alt="{{ $item->item_name }}" class="w-full h-auto object-cover rounded-lg">
-                                                    <div class="absolute inset-0 bg-black bg-opacity-25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <span class="text-white text-sm font-bold">Add</span>
+                                
+                                @if(count($wardrobeItems) > 0)
+                                    @foreach($wardrobeItems as $type => $items)
+                                        <div class="mb-6">
+                                            <h4 class="font-bold capitalize text-gray-600 mb-2">{{ str_replace('_', ' ', $type) }}</h4>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                @foreach($items as $item)
+                                                    <div
+                                                        @click="addItem({
+                                                            id: {{ $item->id }},
+                                                            item_name: '{{ addslashes($item->item_name) }}',
+                                                            image_url: '{{ $item->item_image_url ? Storage::url($item->item_image_url) : asset('images/placeholder.jpg') }}',
+                                                            type: 'digital_wardrobe_item'
+                                                        })"
+                                                        class="cursor-pointer group relative">
+                                                        <img src="{{ $item->item_image_url ? Storage::url($item->item_image_url) : asset('images/placeholder.jpg') }}"
+                                                             alt="{{ $item->item_name }}"
+                                                             class="w-full h-auto object-cover rounded-lg">
+                                                        <div class="absolute inset-0 bg-black bg-opacity-25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                            <span class="text-white text-sm font-bold">Add</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            @endforeach
+                                                @endforeach
+                                            </div>
                                         </div>
-                                    </div>
-                                @empty
+                                    @endforeach
+                                @else
                                     <p class="text-gray-500">Your digital wardrobe is empty.</p>
                                     <a href="{{ route('wardrobe.create') }}" class="mt-2 inline-block text-indigo-600 hover:text-indigo-900">Add items now</a>
-                                @endforelse
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -71,29 +105,4 @@
             </form>
         </div>
     </div>
-
-    <script>
-        function outfitConstructor() {
-            return {
-                outfitName: '',
-                outfitItems: [],
-                formAction: "{{ route('outfits.store') }}",
-                
-                addItem(item) {
-                    if (!this.outfitItems.find(i => i.id === item.id && i.type === 'wardrobe')) {
-                        this.outfitItems.push({
-                            id: item.id,
-                            item_name: item.item_name,
-                            image_url: `{{ Storage::url('') }}${item.image_url}`,
-                            type: 'digital_wardrobe_item' // We specify the morph type here
-                        });
-                    }
-                },
-
-                removeItem(index) {
-                    this.outfitItems.splice(index, 1);
-                }
-            }
-        }
-    </script>
-</x-app-layout> 
+</x-app-layout>
