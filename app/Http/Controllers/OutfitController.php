@@ -25,7 +25,10 @@ class OutfitController extends Controller
     {
         $wardrobeItems = DigitalWardrobeItem::where('user_id', Auth::id())
             ->get()
-            ->groupBy('clothing_type');
+            ->groupBy(function($item) {
+                // Convert enum to string value for grouping
+                return is_object($item->clothing_type) ? $item->clothing_type->value : $item->clothing_type;
+            });
 
         return view('outfits.create', compact('wardrobeItems'));
     }

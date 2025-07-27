@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Enums\ClothingType;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DigitalWardrobeController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
@@ -20,6 +23,15 @@ class DigitalWardrobeController extends Controller
         $wardrobeItems = DigitalWardrobeItem::where('user_id', Auth::id())
             ->latest()
             ->paginate(20);
+            
+        // Transform the items to ensure clothing_type is a string
+        $wardrobeItems->getCollection()->transform(function ($item) {
+            // Convert enum to string value
+            if (is_object($item->clothing_type)) {
+                $item->clothing_type = $item->clothing_type->value;
+            }
+            return $item;
+        });
             
         Log::info('Wardrobe items retrieved', [
             'user_id' => Auth::id(),
@@ -115,7 +127,10 @@ class DigitalWardrobeController extends Controller
      */
     public function show(DigitalWardrobeItem $wardrobe)
     {
-        $this->authorize('view', $wardrobe);
+        // Check if user owns this wardrobe item
+        if ($wardrobe->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
         
         Log::info('Wardrobe item viewed', [
             'item_id' => $wardrobe->id,
@@ -130,7 +145,10 @@ class DigitalWardrobeController extends Controller
      */
     public function edit(DigitalWardrobeItem $wardrobe)
     {
-        $this->authorize('update', $wardrobe);
+        // Check if user owns this wardrobe item
+        if ($wardrobe->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
         
         $clothingTypes = ClothingType::cases();
         return view('wardrobe.edit', compact('wardrobe', 'clothingTypes'));
@@ -141,7 +159,10 @@ class DigitalWardrobeController extends Controller
      */
     public function update(Request $request, DigitalWardrobeItem $wardrobe)
     {
-        $this->authorize('update', $wardrobe);
+        // Check if user owns this wardrobe item
+        if ($wardrobe->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
 
         $validated = $request->validate([
             'item_name' => 'required|string|max:255',
@@ -190,7 +211,10 @@ class DigitalWardrobeController extends Controller
      */
     public function destroy(DigitalWardrobeItem $wardrobe)
     {
-        $this->authorize('delete', $wardrobe);
+        // Check if user owns this wardrobe item
+        if ($wardrobe->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
 
         try {
             $wardrobe->delete();

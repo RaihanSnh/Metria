@@ -143,7 +143,7 @@
                                 </div>
                             </div>
                             <div class="absolute top-2 left-2">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-900 bg-opacity-80 text-white capitalize" x-text="item.clothing_type ? item.clothing_type.replace('_', ' ') : 'Unknown'"></span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-900 bg-opacity-80 text-white capitalize" x-text="item.clothing_type ? String(item.clothing_type).replace(/_/g, ' ') : 'Unknown'"></span>
                             </div>
                         </div>
                         <div class="p-3">

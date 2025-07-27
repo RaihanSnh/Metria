@@ -1,8 +1,3 @@
-@php
-    use Illuminate\Support\Facades\Storage;
-    use Illuminate\Support\Str;
-@endphp
-
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -74,13 +69,6 @@
                                     </button>
                                 </form>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</x-app-layout>
                         </div>
                     </div>
                 </div>

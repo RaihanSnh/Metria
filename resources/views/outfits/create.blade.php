@@ -72,7 +72,7 @@
                                 @if(count($wardrobeItems) > 0)
                                     @foreach($wardrobeItems as $type => $items)
                                         <div class="mb-6">
-                                            <h4 class="font-bold capitalize text-gray-600 mb-2">{{ str_replace('_', ' ', $type) }}</h4>
+                                            <h4 class="font-bold capitalize text-gray-600 mb-2">{{ str_replace('_', ' ', $type->value ?? $type) }}</h4>
                                             <div class="grid grid-cols-2 gap-2">
                                                 @foreach($items as $item)
                                                     <div
