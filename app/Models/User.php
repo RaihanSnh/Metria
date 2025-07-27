@@ -18,19 +18,9 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'username',
-        'full_name',
-        'email',
-        'password',
-        'is_seller',
-        'profile_picture_url',
-        'height_cm',
-        'weight_kg',
-        'bust_circumference_cm',
-        'waist_circumference_cm',
-        'hip_circumference_cm',
-        'is_affiliate',
-        'affiliate_code',
+        'name', 'email', 'password', 'full_name', 'bio', 
+        'profile_image', 'cover_image', 'location', 'website',
+        'birth_date', 'gender', 'is_private'
     ];
 
     /**
@@ -95,5 +85,34 @@ class User extends Authenticatable
     public function store()
     {
         return $this->hasOne(Store::class);
+    }
+
+    // Follow relationships
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'user_follows', 'following_id', 'follower_id')
+                    ->withTimestamps();
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'user_follows', 'follower_id', 'following_id')
+                    ->withTimestamps();
+    }
+
+    public function isFollowing($userId)
+    {
+        return $this->following()->where('following_id', $userId)->exists();
+    }
+
+    public function isFollowedBy($userId)
+    {
+        return $this->followers()->where('follower_id', $userId)->exists();
+    }
+
+    // Add wishlists method for profile controller compatibility
+    public function wishlists()
+    {
+        return $this->belongsToMany(Product::class, 'wishlist_items');
     }
 }
